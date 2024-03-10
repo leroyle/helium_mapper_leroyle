@@ -13,6 +13,7 @@ find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(helium_mapper)
 
 target_sources(                     app PRIVATE src/main.c)
+target_sources(                     app PRIVATE src/helium.c)
 target_sources(                     app PRIVATE boards/board.c)
 target_sources_ifdef(CONFIG_ADC             app PRIVATE src/battery.c)
 target_sources_ifdef(CONFIG_SETTINGS        app PRIVATE src/nvm.c)

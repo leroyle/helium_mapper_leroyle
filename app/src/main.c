@@ -4,11 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// comment out to run all code except actual LoRaWan Join/transmit
-#define FAKE_LORA_SEND  // send real lora messages
-// for Helium, allow subChannelMask to be used to limit join frequencies
-#define ALLOW_SETCHANNELSMASK
-
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,6 +26,21 @@
 #if IS_ENABLED(CONFIG_SHELL)
 #include "shell.h"
 #endif
+
+// Helium Changes
+//
+// tell lorawan layer to cycle through only a subset of total channels
+// comment out to run all code except actual LoRaWan Join/transmit
+#define FAKE_LORA_SEND  // send real lora messages
+// for Helium, allow subChannelMask to be used to limit join frequencies
+#define ALLOW_SETCHANNELSMASK
+
+// use Helium mapper data packet, see helium.c/.h
+#define HELIUM_MAPPER_DATA
+#ifdef HELIUM_MAPPER_DATA
+#include "helium.h"
+#endif
+
 #if IS_ENABLED(CONFIG_BT)
 #include "ble.h"
 #endif
@@ -39,10 +49,6 @@
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(helium_mapper, LOG_LEVEL_INF);
 // LOG_MODULE_REGISTER(helium_mapper, LOG_LEVEL_WRN);
-
-// Helium Changes
-// tell lorawan layer to cycle through only a subset of total channels
-int lorawan_setChannelsMask(uint16_t *);
 
 #define LED_GREEN_NODE DT_ALIAS(green_led)
 #define LED_BLUE_NODE DT_ALIAS(blue_led)
@@ -630,6 +636,7 @@ int init_lora(struct s_helium_mapper_ctx *ctx) {
 		return ret;
 	}
 
+#ifdef  HELIUM_MAPPER_DATA
 #ifdef ALLOW_SETCHANNELSMASK
 	//  if defined, also add the lorawan__setChannlesMask() function to:
         //  zephyr/subsys/lorawan/lorawan.c
@@ -643,7 +650,7 @@ int init_lora(struct s_helium_mapper_ctx *ctx) {
                 return ret;
         }
 #endif
-
+#endif
 
 	lorawan_register_downlink_callback(&downlink_cb);
 	lorawan_register_dr_changed_callback(lorwan_datarate_changed);
@@ -741,10 +748,32 @@ void lora_send_msg(struct s_helium_mapper_ctx *ctx)
 	}
 #endif
 
+	/* Send at least one confirmed msg on every 10 to check connectivity */
+	if (msg_type == LORAWAN_MSG_UNCONFIRMED &&
+			!(lorawan_status.msgs_sent % 10)) {
+		msg_type = LORAWAN_MSG_CONFIRMED;
+	}
+
 #if IS_ENABLED(CONFIG_UBLOX_MAX7Q)
 	read_location(&mapper_data);
 #endif
 
+#ifdef HELIUM_MAPPER_DATA
+	LOG_WRN("LoraWan Data buffer size: %d", sizeof(m_lora_app_data_buffer));
+
+	memset(m_app_data.buffer, 0, LORAWAN_APP_DATA_BUFF_SIZE);	 
+
+	setHeliumTransmitBuff(&mapper_data, &m_app_data);
+
+	LOG_HEXDUMP_WRN(m_app_data.buffer, m_app_data.buffsize, //sizeof(struct s_mapper_data),
+                        "Raw LoRaWan data");
+#ifdef SEND_REAL_LORA
+        err = lorawan_send(m_app_data.port,
+                        m_app_data.buffer, m_app_data.buffsize,
+                        msg_type);
+#endif
+
+#else   // not HELIUM Mapper
 	LOG_HEXDUMP_DBG(data_ptr, sizeof(struct s_mapper_data),
 			"mapper_data");
 	LOG_HEXDUMP_WRN(data_ptr, sizeof(struct s_mapper_data),
@@ -756,6 +785,9 @@ void lora_send_msg(struct s_helium_mapper_ctx *ctx)
 		msg_type = LORAWAN_MSG_CONFIRMED;
 	}
 
+#endif
+
+
 	LOG_INF("Lora send -------------->");
 
 	led_enable(&led_blue, 0);
@@ -764,6 +796,8 @@ void lora_send_msg(struct s_helium_mapper_ctx *ctx)
 	err = lorawan_send(lorawan_config.app_port,
 			data_ptr, sizeof(struct s_mapper_data),
 			msg_type);
+#else
+	LOG_ERR("Note: Lorawan data not sent due to FAKE_LORA_SEND override");
 #endif
 	if (err < 0) {
 		//TODO: make special LED pattern in this case
