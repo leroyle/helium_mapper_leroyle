@@ -1,0 +1,16 @@
+
+
+from helium console 
+{
+  "id": "e2369e11-c1e8-42cf-94e6-e17b77b843bb",
+  "name": "Mapper",
+  "status": "success",
+  "decoded_payload": {
+    "accuracy": 2.5,
+    "altitude": -148,
+    "battery": 2.54,
+    "latitude": 32.861539,
+    "longitude": -96.778795,
+    "sats": 87,
+    "speed": 58.42
+  }

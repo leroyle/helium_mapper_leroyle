@@ -1,0 +1,13 @@
+
+west build -b rak4631_nrf52840 -s app
+
+Project.SetOSPlugin("ZephyrPlugin");
+
+32.861539, -96.778795
+
+ # push
+< git push  origin  helium_mapper_v0.07
+
+
+
+__attribute__((optimize("O0")))  to read_location

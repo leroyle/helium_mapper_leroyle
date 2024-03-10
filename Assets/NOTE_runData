@@ -1,0 +1,67 @@
+
+
+090005074e4efff13ca045 010a 0139 0801
+Payload= "CQAFB01O//E8n0U="
+decoded:  090005074d4efff13c9f45
+{
+  "id": "e2369e11-c1e8-42cf-94e6-e17b77b843bb",
+  "name": "Mapper",
+  "status": "success",
+  "decoded_payload": {
+    "accuracy": 2.5,
+    "altitude": -15,
+    "battery": 3.59,
+    "latitude": 32.861539,
+    "longitude": -96.778795,
+    "sats": 69,
+    "speed": 37.29
+  }
+}
+
+09003249124eff6c5e17450000d1001610360401
+090032490c4eff6c5e1e450000de0003103c0501 
+09003249114eff6c5e56450000ea000810430401
+Arduino
+at web interface
+
+"payload": "CQAySRFO/2xeI1c=",
+base64 decoded: 09003249114EFF6C5E2357
+
+decoder decoded:
+{
+  "id": "e2369e11-c1e8-42cf-94e6-e17b77b843bb",
+  "name": "Mapper",
+  "status": "success",
+  "decoded_payload": {
+    "latitude": 32.95505,
+    "li": -9675229,
+    "ll": 0,
+    "ll1": 50,
+    "ll2": 73,
+    "ll3": 17,
+    "longitude": -96.75229
+  }
+}
+
+
+09 00 05 07 4c 4e 00 0e  c3 62 57 01 00 f8 00 0e 10 2f 03 01 
+
+at device
+
+
+X = 0.00mg Y = -32.03mg Z =-1024.83mg
+Latitude= 3295505
+          0x324911
+Longitude= -9675229
+          0xFF6C5E2C
+Send lora frame
+**** Skip sending data ****
+09003249114EFF6C5E235700
+lmh_send ok count 1
+
+
+ilat: 3295533
+long: -9675249
+ Memory  2000652a is the last item in buffer
+20006520: 49320009 6CFF4E2D
+20006528: 00570F5E 00000000

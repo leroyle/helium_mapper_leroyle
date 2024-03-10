@@ -1,0 +1,118 @@
+
+"raw_packet": "QDABAEiAAAACrX1jLnqvjMGJm8nhTXem",
+  "payload": "CQAySRBO/2xeOVc=",
+
+base64 to Hex this is fed into the helium decoder, not an exact match to the
+numbers below: athe lat/lng is slightly off
+	09003249104eff6c5e3957
+
+  decoder port must be 2
+  09:  Header indicator that the data is the GPS coordinate
+flat:  32.9550018
+flng:  -96.7523727
+
+iflat:  3295500   (0x324915 )
+ilng:   -9675237  (0x FF6C5E38)
+
+ data
+
+20006520:  49320009 6CFF4E0C
+20006528:  00571B5E 00000000
+
+
+
+
+
+      //lat/lng data
+
+      memset(m_lora_app_data.buffer, 0, LORAWAN_APP_DATA_BUFF_SIZE);
+      //LAL Must be decoded as port 2
+      m_lora_app_data.port = gAppPort;   2000652D == 2
+      m_lora_app_data.buffer[0] = 0x09;  20006520 == 9
+      m_lora_app_data.buffer[1] = (ilat & 0xFF000000) >> 24;    20006521 == 0
+      m_lora_app_data.buffer[2] = (ilat & 0x00FF0000) >> 16;    20006522 == 32
+      m_lora_app_data.buffer[3] = (ilat & 0x0000FF00) >> 8;     20006523 == 49
+      m_lora_app_data.buffer[4] =  ilat & 0x000000FF;i          20006524 == 15
+      if(direction_S_N == 0)
+      {
+        m_lora_app_data.buffer[5] = 'S';        20006525 == 
+      }
+      else
+      {
+        m_lora_app_data.buffer[5] = 'N';        20006525 == 4E
+      }
+      //lon data
+      m_lora_app_data.buffer[6] = (ilon & 0xFF000000) >> 24;    20006526 == FF
+      m_lora_app_data.buffer[7] = (ilon & 0x00FF0000) >> 16;    20006527 == 6C
+      m_lora_app_data.buffer[8] = (ilon & 0x0000FF00) >> 8;    20006528 == 5E
+      m_lora_app_data.buffer[9] =  ilon & 0x000000FF;          20006529 == 38
+      if(direction_E_W == 0)
+      {
+        m_lora_app_data.buffer[10] = 'E';    20006530 == 
+      }
+      else
+      {
+        m_lora_app_data.buffer[10] = 'W';    20006530 == 57
+      }
+      m_lora_app_data.buffsize = 11;
+      send_lora_frame()
+
+
+20006518: 00000000 00000002   .... ....
+20006520: 49320009 6CFF4E14   ..2I.Yyl
+20006528: 0057375E 00000000   ^7W. ....
+20006530: 00000000 00000000
+
+                        Port
+20006518: 00000000 00000002   .... ....
+           Lat   ? LNG.W.Lat
+20006520: 49320009 6CFF4E14   ..2I.Yyl
+            W Lng
+20006528: 0057385E 00000000   ^7W. ....
+
+
+
+
+{
+  "id": "e2369e11-c1e8-42cf-94e6-e17b77b843bb",
+  "name": "Mapper",
+  "status": "success",
+  "decoded_payload": {
+    "accuracy": 2.5,
+    "altitude": -148,
+    "battery": 2.57,
+    "latitude": 32.861539,
+    "longitude": -96.778795,
+    "sats": 87,
+    "speed": 58.42
+  }
+}
+{
+  "body": {
+    "app_eui": "95612A1C2722EE26",
+    "dc": {
+      "balance": 4776085,
+      "nonce": 1
+    },
+    "decoded": {
+      "payload": {
+        "accuracy": 2.5,
+        "altitude": -148,
+        "battery": 2.57,
+        "latitude": 32.861539,
+        "longitude": -96.778795,
+        "sats": 87,
+        "speed": 58.42
+      },
+      "status": "success"
+    },
+
+
+
+Zephyr
+
+lat:  32.955005
+lng: -96.752021
+
+1C 42 95 9A 3D 7A 40 40  EF 39 B0 1C 21 30 58 C0
+01 01 00 01 00 2E 1B 5B  30 6D 0D 0A 20 65 76 65
