@@ -30,7 +30,8 @@ void read_location(struct s_mapper_data *mapper_data)
 		return;
 	}
 	tmp = sensor_value_to_double(&lat);
-	mapper_data->lat = (uint32_t)(tmp * 100000);
+	// mapper_data->lat = (uint32_t)(tmp * 100000);
+	mapper_data->lat = (long)(tmp * 100000);
 
 	err = sensor_channel_get(dev, SENSOR_CHAN_NAV_LONGITUDE, &lng);
 	if (err < 0) {
@@ -38,7 +39,8 @@ void read_location(struct s_mapper_data *mapper_data)
 		return;
 	}
 	tmp = sensor_value_to_double(&lng);
-	mapper_data->lng = (uint32_t)(tmp * 100000);
+	// mapper_data->lng = (uint32_t)(tmp * 100000);
+	mapper_data->lng = (long)(tmp * 100000);
 
 	err = sensor_channel_get(dev, SENSOR_CHAN_NAV_SATELLITES, &sat);
 	if (err < 0) {
@@ -63,7 +65,7 @@ void read_location(struct s_mapper_data *mapper_data)
 	tmp = sensor_value_to_double(&acc);
 	mapper_data->accuracy = (uint16_t)(tmp * 100);
 
-	LOG_DBG("lat: %d.%06d, lng: %d.%06d, sat: %d, alt: %d.%06d, acc: %d.%06d",
+	LOG_WRN("lat: %d.%06d, lng: %d.%06d, sat: %d, alt: %d.%06d, acc: %d.%06d",
 			lat.val1, lat.val2,
 			lng.val1, lng.val2,
 			sat.val1,
