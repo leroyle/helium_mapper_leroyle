@@ -6,6 +6,8 @@
 
 // comment out to run all code except actual LoRaWan Join/transmit
 #define FAKE_LORA_SEND  // send real lora messages
+// for Helium, allow subChannelMask to be used to limit join frequencies
+#define ALLOW_SETCHANNELSMASK
 
 
 #include <stdio.h>
@@ -38,6 +40,9 @@
 LOG_MODULE_REGISTER(helium_mapper, LOG_LEVEL_INF);
 // LOG_MODULE_REGISTER(helium_mapper, LOG_LEVEL_WRN);
 
+// Helium Changes
+// tell lorawan layer to cycle through only a subset of total channels
+int lorawan_setChannelsMask(uint16_t *);
 
 #define LED_GREEN_NODE DT_ALIAS(green_led)
 #define LED_BLUE_NODE DT_ALIAS(blue_led)
@@ -624,6 +629,21 @@ int init_lora(struct s_helium_mapper_ctx *ctx) {
 		LOG_ERR("lorawan_start failed: %d", ret);
 		return ret;
 	}
+
+#ifdef ALLOW_SETCHANNELSMASK
+	//  if defined, also add the lorawan__setChannlesMask() function to:
+        //  zephyr/subsys/lorawan/lorawan.c
+	//  Find it in this project at: Assets/zephyr/subsys/lorawan/lorawan.c
+
+        // Enabling 2nd block of 8 channels (8-15) + channel 65
+        uint16_t channelsMask[] = { 0xFF00, 0x0000, 0x0000, 0x0000, 0x0002, 0x0000};
+        ret = lorawan_setChannelsMask(channelsMask);
+        if (ret < 0) {
+                LOG_ERR("lorawan_setChannelsMask failed: %d", ret);
+                return ret;
+        }
+#endif
+
 
 	lorawan_register_downlink_callback(&downlink_cb);
 	lorawan_register_dr_changed_callback(lorwan_datarate_changed);
