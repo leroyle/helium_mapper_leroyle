@@ -2,6 +2,13 @@
 
 cmake_minimum_required(VERSION 3.20.0)
 
+# Force reset nRF52840 boards
+macro(app_set_runner_args)
+     board_runner_args(nrfjprog "--softreset")
+endmacro()
+#LAL
+
+
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(helium_mapper)
 

@@ -4,6 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// comment out to run all code except actual LoRaWan Join/transmit
+#define FAKE_LORA_SEND  // send real lora messages
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <zephyr/device.h>
@@ -31,7 +35,9 @@
 
 #define LOG_LEVEL CONFIG_LOG_DEFAULT_LEVEL
 #include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(helium_mapper);
+LOG_MODULE_REGISTER(helium_mapper, LOG_LEVEL_INF);
+// LOG_MODULE_REGISTER(helium_mapper, LOG_LEVEL_WRN);
+
 
 #define LED_GREEN_NODE DT_ALIAS(green_led)
 #define LED_BLUE_NODE DT_ALIAS(blue_led)
@@ -51,8 +57,8 @@ struct s_lorawan_config lorawan_config = {
 	.lora_class = LORAWAN_CLASS_A,
 	.confirmed_msg = LORAWAN_MSG_UNCONFIRMED,
 	.app_port = 2,
-	.auto_join = false,
-	.send_repeat_time = 0,
+	.auto_join = true,
+	.send_repeat_time = 10,
 	.send_min_delay = 30,
 	.max_gps_on_time = 300,
 	/* max join attempt in one join session */
@@ -550,6 +556,13 @@ int join_lora(struct s_helium_mapper_ctx *ctx) {
 	int retry = lorawan_config.join_try_count;
 	int ret = 0;
 
+// fake LoRaWan join
+#ifdef FAKE_LORA_SEND
+         lorawan_state(ctx, JOINED);
+         return ret;
+#endif
+
+
 	join_cfg.mode = lorawan_config.lora_mode;
 	join_cfg.dev_eui = lorawan_config.dev_eui;
 	join_cfg.otaa.join_eui = lorawan_config.app_eui;
@@ -714,6 +727,8 @@ void lora_send_msg(struct s_helium_mapper_ctx *ctx)
 
 	LOG_HEXDUMP_DBG(data_ptr, sizeof(struct s_mapper_data),
 			"mapper_data");
+	LOG_HEXDUMP_WRN(data_ptr, sizeof(struct s_mapper_data),
+			"mapper_data");
 
 	/* Send at least one confirmed msg on every 10 to check connectivity */
 	if (msg_type == LORAWAN_MSG_UNCONFIRMED &&
@@ -724,9 +739,12 @@ void lora_send_msg(struct s_helium_mapper_ctx *ctx)
 	LOG_INF("Lora send -------------->");
 
 	led_enable(&led_blue, 0);
+
+#ifndef FAKE_LORA_SEND
 	err = lorawan_send(lorawan_config.app_port,
 			data_ptr, sizeof(struct s_mapper_data),
 			msg_type);
+#endif
 	if (err < 0) {
 		//TODO: make special LED pattern in this case
 		lorawan_status.msgs_failed++;
