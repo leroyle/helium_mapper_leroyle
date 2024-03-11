@@ -765,12 +765,15 @@ void lora_send_msg(struct s_helium_mapper_ctx *ctx)
 
 	setHeliumTransmitBuff(&mapper_data, &m_app_data);
 
-	LOG_HEXDUMP_WRN(m_app_data.buffer, m_app_data.buffsize, //sizeof(struct s_mapper_data),
-                        "Raw LoRaWan data");
-#ifdef SEND_REAL_LORA
+	LOG_INF("Lora send -------------->");
+
+	led_enable(&led_blue, 0);
+#ifndef FAKE_LORA_SEND
         err = lorawan_send(m_app_data.port,
                         m_app_data.buffer, m_app_data.buffsize,
                         msg_type);
+#else
+	LOG_ERR("Note: Lorawan data not sent due to FAKE_LORA_SEND override");
 #endif
 
 #else   // not HELIUM Mapper
@@ -784,13 +787,10 @@ void lora_send_msg(struct s_helium_mapper_ctx *ctx)
 			!(lorawan_status.msgs_sent % 10)) {
 		msg_type = LORAWAN_MSG_CONFIRMED;
 	}
-
-#endif
-
-
 	LOG_INF("Lora send -------------->");
 
 	led_enable(&led_blue, 0);
+
 
 #ifndef FAKE_LORA_SEND
 	err = lorawan_send(lorawan_config.app_port,
@@ -798,6 +798,7 @@ void lora_send_msg(struct s_helium_mapper_ctx *ctx)
 			msg_type);
 #else
 	LOG_ERR("Note: Lorawan data not sent due to FAKE_LORA_SEND override");
+#endif
 #endif
 	if (err < 0) {
 		//TODO: make special LED pattern in this case
